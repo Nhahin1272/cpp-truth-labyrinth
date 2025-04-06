@@ -45,7 +45,7 @@ int main() {
 
     file.close();
 
-    // 🎲 Randomly select one agent to be the mole
+    // Randomly select one agent to be the mole
     srand(static_cast<unsigned int>(time(0)));  // Seed the random generator
     int moleIndex = rand() % agents.size();     // Random index
     agents[moleIndex].isMole = true;
@@ -64,6 +64,63 @@ int main() {
         cout << "  " << (i + 1) << ". " << agents[i].name << endl; // number starts from 1
     }
 
+    // Let the player pick 3 agents to interview
+    vector<int> interviewedIndices;
+
+    for (int interview = 1; interview <= 3; ++interview) {
+        int choice;
+        cout << "\n🕵️ Interview #" << interview << ": Pick an agent (1-" << agents.size() << "): ";
+        cin >> choice;
+
+        // Validate input
+        if (choice < 1 || choice > agents.size()) {
+            cout << "❌ Invalid choice. Please pick a valid agent number.\n";
+            --interview; // try again
+            continue;
+        }
+
+        // Check if this agent was already interviewed
+        if (find(interviewedIndices.begin(), interviewedIndices.end(), choice) != interviewedIndices.end()) {
+            cout << "⚠️ You already interviewed this agent. Pick someone else.\n";
+            --interview;
+            continue;
+        }
+
+        // Store interview choice and show statement
+        interviewedIndices.push_back(choice);
+        cout << "\n🗣️ " << agents[choice - 1].name << " says: \"" << agents[choice - 1].statement << "\"\n";
+    }
+
     
+    // 🎯 Let the player guess the mole
+    int guess;
+    cout << "\n🎯 Final Question: Who do you think is the mole? (Enter the agent number): ";
+    cin >> guess;
+
+    // ❌ Validate guess is within the range
+    if (guess < 1 || guess > agents.size()) {
+        cout << "🚫 Invalid guess. Ending game.\n";
+        return 1;
+    }
+
+    // 🕵️ Check if the guess was correct
+    if (agents[guess - 1].isMole) {
+        cout << "\n🎉 You got it! " << agents[guess - 1].name << " was the mole all along!\n";
+    } else {
+        // 🔍 Find who the actual mole was (to show the correct answer)
+        string actualMoleName;
+        for (const Agent& a : agents) {
+            if (a.isMole) {
+                actualMoleName = a.name;
+                break;
+            }
+        }
+
+        cout << "\n❌ Wrong guess! The real mole was " << actualMoleName << ".\n";
+    }
+
+    // 🏁 End of game message
+    cout << "\n🧠 Thanks for playing TruthLabyrinth! Until next mission...\n";
+
     return 0;
 }
